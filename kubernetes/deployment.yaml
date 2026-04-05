@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: erp-system-api
+  labels:
+    app: erp-system
+spec:
+  replicas: 2 # High Availability requirement
+  selector:
+    matchLabels:
+      app: erp-system
+  template:
+    metadata:
+      labels:
+        app: erp-system
+    spec:
+      containers:
+        - name: erp-api
+          image: erp-system-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+          # Liveness & Readiness probes for monitoring
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
